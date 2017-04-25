@@ -74,8 +74,8 @@ def getfreqwords(indir, outfile, exitCondition):
                     '(/root/sentence[@hash=%d]/@value)[1]' % key[0])[0] + '\n')
 
 
-if os.path.exists(tmp_file):
-    os.remove(tmp_file)
+    if os.path.exists(tmp_file):
+        os.remove(tmp_file)
 
 
 class ExitCondition(Exception):

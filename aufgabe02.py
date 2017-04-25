@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PCL II, Uebung 4, FS17
-# Aufgabe 1
+# Aufgabe 2
 
 import bz2
 from lxml import etree
@@ -21,7 +21,7 @@ def gettitles(infile, testfile, trainfile, k, exitCondition):
         trainfile: Ausgabedatei für alle anderen Titel
         We apply Reservoir Sampling that has been presented in the lecture.
         The counter starts counting after a sufficient amount of test data has
-        been collected."""
+        been collected. Data has already been unzipped. Please provide unzipped data"""
 
     if os.path.exists(testfile):
         os.remove(testfile)
@@ -37,24 +37,25 @@ def gettitles(infile, testfile, trainfile, k, exitCondition):
 
     counter_exit = 0
     i = 0
-    tree = etree.iterparse(
-        bz2.open(infile), tag='{http://www.mediawiki.org/xml/export-0.10/}title')
 
-    test = open(testfile, 'a')
+    """data being read in"""
+    tree = etree.iterparse(infile, tag='{http://www.mediawiki.org/xml/export-0.10/}title')
+
+    test = open(testfile, 'a', encoding='utf-8')
     for event, elem in itertools.islice(tree, k):
         test.write(elem.text + "\n")
         i += 1
-        # print('%s\n' % elem.text.encode('utf-8'))
+        # Element clear is for memory cleansing
         elem.clear()
         for element in elem.xpath('ancestor-or-self::*'):
             while element.getprevious() is not None:
                 del element.getparent()[0]
 
     test.close()
-
+    """Algorithm R"""
     train = open(trainfile, 'a', encoding='utf-8')
     try:
-        for event, elem in itertools.islice(tree, k + 1, None):
+        for event, elem in tree:
             r = random.randint(0, i)
             if r < k:
                 replaceLine(testfile, elem.text, r)
@@ -77,17 +78,19 @@ def gettitles(infile, testfile, trainfile, k, exitCondition):
 
 def replaceLine(temp_file, replacement, placeOfLine):
     """Adaption from http://stackoverflow.com/questions/39086/search-and-replace-a-line-in-a-file-in-python
-    and http://stackoverflow.com/questions/16622754/how-do-you-replace-a-line-of-text-in-a-text-file-python"""
+    and http://stackoverflow.com/questions/16622754/how-do-you-replace-a-line-of-text-in-a-text-file-python
+    Line Replacement for Algorithm R. Writes to new file everytime"""
 
     fh, abs_path = mkstemp()
-    with open(abs_path, 'w', encoding="utf-8") as output_file, open(temp_file) as input_file:
+    with open(abs_path, 'w', encoding='utf-8') as output_file, open(temp_file, encoding='utf-8') as input_file:
         n = 0
         for line in input_file:
             if n == placeOfLine:
                 output_file.write(replacement + "\n")
             else:
-                output_file.write(line + "\n")
+                output_file.write(line)
             n += 1
+            del line
 
     close(fh)
     # Remove original file
@@ -102,8 +105,6 @@ class ExitCondition(Exception):
 
 
 def main():
-    # Get the input and output filenames as well as sample size from
-    # commandline
     parser = argparse.ArgumentParser(
         description='Choose k random titles from dump')
     parser.add_argument('--infile', '-i', dest='infile')

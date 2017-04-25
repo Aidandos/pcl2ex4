@@ -1,0 +1,2 @@
+a.) Das sequentielle Verarbeiten von Textdateien kann sehr wertvoll sein. Beim Programmieren hat man gemerkt, wie schnell der Arbeitsspeicher an seine Grenzen kommt, was eine vernünftige Bearbeitung unmöglich macht.
+b.) Wir haben circa 8h in diese Übung investiert.
